@@ -1,0 +1,56 @@
+[
+    {
+        "id": 1,
+        "category": "Doctor",
+        "name": "Paul",
+        "phone": "+5491156090716"
+    },
+    {
+        "id": 3,
+        "category": "Patient",
+        "nombre_completo": "cande",
+        "phone": "123456015"
+    },
+    {
+        "id": 4,
+        "category": "Patient",
+        "name": "paulmccartney",
+        "phone": "1124090716"
+    },
+    {
+        "id": 4,
+        "category": "Patient",
+        "name": "paul",
+        "phone": "5491156090716"
+    },
+    {
+        "id": 5,
+        "category": "Patient",
+        "name": "hola",
+        "phone": "+5491113214345"
+    },
+    {
+        "id": 6,
+        "category": "Patient",
+        "name": "natalia",
+        "phone": "+549111165549012"
+    },
+    {
+        "id": 7,
+        "category": "Patient",
+        "name": "natalia",
+        "phone": "+5491165549012"
+    },
+    {
+        "id": 8,
+        "category": "Patient",
+        "name": "malena",
+        "phone": "+5491156090716"
+    },
+    {
+        "id": 9,
+        "category": "Patient",
+        "name": "malena",
+        "phone": "1156090716"
+    }
+]
