@@ -6,7 +6,7 @@ import json
 import os
 from twilio.rest import Client
 
-#Twilio
+# Twilio
 ACCOUNT_SID = 'AC2a5e1f0b785cbef8d46cd60143678688'
 AUTH_TOKEN = '97423e9dcbda897368147000870e79a1'
 TWILIO_PHONE = '+5491156090716'
@@ -16,6 +16,7 @@ client = Client(ACCOUNT_SID, AUTH_TOKEN)
 users_file = 'data/users.json'
 
 def load_users():
+    """Carga los usuarios desde un archivo JSON."""
     if os.path.exists(users_file):
         with open(users_file, 'r') as file:
             return json.load(file)
@@ -23,11 +24,12 @@ def load_users():
         return []
 
 def save_users(users):
+    """Guarda los usuarios en un archivo JSON."""
     with open(users_file, 'w') as file:
         json.dump(users, file, indent=4)
 
 def format_phone(phone):
-    """ Asegúrate de que el número tenga el prefijo internacional correcto y no tenga un '11' de más. """
+    """Asegúrate de que el número tenga el prefijo internacional correcto y no tenga un '11' de más."""
     phone = phone.strip()  # Elimina espacios en blanco
     if phone.startswith("11"):
         phone = phone[2:]  # Elimina el "11" si está al principio
@@ -36,6 +38,7 @@ def format_phone(phone):
     return phone
 
 def send_code(phone, code):
+    """Envía un código de verificación al teléfono proporcionado."""
     formatted_phone = format_phone(phone)
     message = f"Su código de verificación es: {code}"
     try:
@@ -48,8 +51,8 @@ def send_code(phone, code):
     except Exception as e:
         print(f'Error al enviar SMS: {e}')
 
-#generar código
 def generate_and_send_code(full_name, phone):
+    """Genera un código, lo guarda o actualiza el usuario y lo envía por SMS."""
     code = secrets.token_hex(3)  
     users = load_users()
 
@@ -70,36 +73,53 @@ def generate_and_send_code(full_name, phone):
 
     return code
 
-#app
-def login_screen():
-    top = tk.Toplevel(root)
-    top.title("Iniciar Sesión")
+def show_frame(frame):
+    """Muestra el frame especificado en la ventana principal."""
+    frame.tkraise()
 
+def login_screen(root, frames):
+    """Pantalla de inicio de sesión."""
+    login_frame = ttk.Frame(root)
+    login_frame.grid(row=0, column=0, sticky='nsew')
+
+    # Header
+    header_label = ttk.Label(login_frame, text="Sistema gestor de turnos", font=("Arial", 20))
+    header_label.grid(row=0, column=0, columnspan=2, pady=10)
+
+    subheader_label = ttk.Label(login_frame, text="Bienvenido, ingrese sus datos para avanzar a sacar turno.", font=("Arial", 10))
+    subheader_label.grid(row=1, column=0, columnspan=2, padx= 10, pady=10)
+
+    ttk.Label(login_frame, text="Nombre Completo:").grid(row=2, column=0, padx=10, pady=10)
+    full_name_entry = ttk.Entry(login_frame)
+    full_name_entry.grid(row=2, column=1, padx=10, pady=10)
+
+    ttk.Label(login_frame, text="Teléfono Celular:").grid(row=3, column=0, padx=10, pady=10)
+    phone_entry = ttk.Entry(login_frame)
+    phone_entry.grid(row=3, column=1, padx=10, pady=10)
+    
     def verify_user():
         full_name = full_name_entry.get()
         phone = phone_entry.get()
         if full_name and phone:
             generated_code = generate_and_send_code(full_name, phone)
             print(f'Código generado: {generated_code}')
-            verify_code_screen(phone, generated_code)
+            verify_code_screen(root, frames, phone, generated_code)
         else:
             print("Por favor ingrese nombre y celular.")
 
-    mainframe = ttk.Frame(top, padding="10 10 20 20")
-    mainframe.grid(column=0, row=0, sticky=(tk.N, tk.W, tk.E, tk.S))
-
-    full_name_entry = ttk.Entry(mainframe, width=30)
-    full_name_entry.grid(column=1, row=1, padx=5, pady=5)
-    ttk.Label(mainframe, text="Nombre Completo:").grid(column=0, row=1, padx=5, pady=5)
-
-    phone_entry = ttk.Entry(mainframe, width=30)
-    phone_entry.grid(column=1, row=2, padx=5, pady=5)
-    ttk.Label(mainframe, text="Teléfono Celular:").grid(column=0, row=2, padx=5, pady=5)
+    ttk.Button(login_frame, text="Enviar Código", command=verify_user).grid(row=4, column=0, columnspan=2, pady=20)
     
-    ttk.Button(mainframe, text="Enviar Código", command=verify_user).grid(column=1, row=3, padx=5, pady=5)
+    return login_frame
 
-#verificador
-def verify_code_screen(phone, generated_code):
+def verify_code_screen(root, frames, phone, generated_code):
+    """Pantalla de verificación de código."""
+    verify_code_frame = ttk.Frame(root)
+    verify_code_frame.grid(row=0, column=0, sticky='nsew')
+
+    ttk.Label(verify_code_frame, text="Código:").grid(row=0, column=0, padx=10, pady=10)
+    code_entry = ttk.Entry(verify_code_frame)
+    code_entry.grid(row=0, column=1, padx=10, pady=10)
+    
     def check_code():
         entered_code = code_entry.get()
         if entered_code == generated_code:
@@ -108,34 +128,26 @@ def verify_code_screen(phone, generated_code):
             user_data = next((u for u in users if u["phone"] == phone), None)
             if user_data:
                 if user_data["category"] == "Doctor":
-                    doctor_screen()
+                    show_frame(frames["DoctorScreen"])
                 else:
-                    patient_screen()
+                    show_frame(frames["PatientScreen"])
         else:
             print("Código Incorrecto")
 
-    top_code = tk.Toplevel(root)
-    top_code.title("Validar Código")
+    ttk.Button(verify_code_frame, text="Verificar", command=check_code).grid(row=1, column=0, columnspan=2, pady=20)
+    ttk.Button(verify_code_frame, text="Volver al Inicio", command=lambda: show_frame(frames["LoginScreen"])).grid(row=2, column=0, columnspan=2, pady=10)
 
-    mainframe = ttk.Frame(top_code, padding="10 10 20 20")
-    mainframe.grid(column=0, row=0, sticky=(tk.N, tk.W, tk.E, tk.S))
+    return verify_code_frame
 
-    code_entry = ttk.Entry(mainframe, width=10)
-    code_entry.grid(column=1, row=1, padx=5, pady=5)
-    ttk.Label(mainframe, text="Código:").grid(column=0, row=1, padx=5, pady=5)
-    
-    ttk.Button(mainframe, text="Verificar", command=check_code).grid(column=1, row=2, padx=5, pady=5)
+def doctor_screen(root, frames):
+    """Pantalla de doctor."""
+    doctor_frame = ttk.Frame(root)
+    doctor_frame.grid(row=0, column=0, sticky='nsew')
 
-#pantalla doctor
-def doctor_screen():
-    top_doctor = tk.Toplevel(root)
-    top_doctor.title("Doctor")
-    
-    cal = Calendar(top_doctor, selectmode='day', year=2024, month=9, day=7)
+    cal = Calendar(doctor_frame, selectmode='day', year=2024, month=9, day=7)
     cal.pack(pady=20)
-    
-    #mensajes
-    mensaje_box = tk.Text(top_doctor, height=5, width=40)
+
+    mensaje_box = tk.Text(doctor_frame, height=5, width=40)
     mensaje_box.pack(pady=10)
 
     def enviar_mensaje():
@@ -143,38 +155,51 @@ def doctor_screen():
         if mensaje:
             users = load_users()
             for user in users:
-                send_code(user['phone'], mensaje)  #Twilio
+                send_code(user['phone'], mensaje)  # Twilio
             print(f"Mensaje enviado a todos los usuarios: {mensaje}")
         else:
             print("El mensaje está vacío.")
 
-    ttk.Button(top_doctor, text="Enviar Mensaje a Usuarios", command=enviar_mensaje).pack(pady=10)
+    ttk.Button(doctor_frame, text="Enviar Mensaje a Usuarios", command=enviar_mensaje).pack(pady=10)
+    ttk.Button(doctor_frame, text="Volver al Inicio", command=lambda: show_frame(frames["LoginScreen"])).pack(pady=10)
 
+    return doctor_frame
 
-#pantalla paciente
-def patient_screen():
-    top_patient = tk.Toplevel(root)
-    top_patient.title("Paciente")
-    
-    cal = Calendar(top_patient, selectmode='day', year=2024, month=9, day=7)
+def patient_screen(root, frames):
+    """Pantalla de paciente."""
+    patient_frame = ttk.Frame(root)
+    patient_frame.grid(row=0, column=0, sticky='nsew')
+
+    cal = Calendar(patient_frame, selectmode='day', year=2024, month=9, day=7)
     cal.pack(pady=20)
 
     def reservar_turno():
         fecha_seleccionada = cal.get_date()
         print(f"Turno reservado para: {fecha_seleccionada}")
 
-    ttk.Button(top_patient, text="Reservar Turno", command=reservar_turno).pack(pady=10)
-    
+    ttk.Button(patient_frame, text="Reservar Turno", command=reservar_turno).pack(pady=10)
+
     def ver_turnos_anteriores():
         print("Mostrando turnos anteriores")
 
-    ttk.Button(top_patient, text="Turnos Anteriores", command=ver_turnos_anteriores).pack(pady=10)
+    ttk.Button(patient_frame, text="Turnos Anteriores", command=ver_turnos_anteriores).pack(pady=10)
+    ttk.Button(patient_frame, text="Volver al Inicio", command=lambda: show_frame(frames["LoginScreen"])).pack(pady=10)
 
+    return patient_frame
 
-#llamada a main
-root = tk.Tk()
-root.title("Consultorio")
+def main():
+    root = tk.Tk()
+    root.title("Consultorio")
 
-ttk.Button(root, text="Iniciar Sesión/Registrarse", command=login_screen).pack(padx=10, pady=10)
+    frames = {}
+    frames["LoginScreen"] = login_screen(root, frames)
+    frames["VerifyCodeScreen"] = verify_code_screen(root, frames, "", "")
+    frames["DoctorScreen"] = doctor_screen(root, frames)
+    frames["PatientScreen"] = patient_screen(root, frames)
 
-root.mainloop()
+    show_frame(frames["LoginScreen"])
+
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
