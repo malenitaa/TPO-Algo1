@@ -7,6 +7,10 @@ import os
 from twilio.rest import Client
 import re, unicodedata
 #ver que capaz se repiten validaciones de celular con las funciones validar y sendcode
+#customtkinter
+#modularizar 
+#pep.8 pipinstallpep8
+#niceui
 
 # Twilio
 ACCOUNT_SID = 'AC2a5e1f0b785cbef8d46cd60143678688'
