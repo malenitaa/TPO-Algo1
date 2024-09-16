@@ -40,11 +40,17 @@ def formatear_nombre(nombre):
     return nombre_sin_tildes.title()
 
 def validate_phone(phone, error_label):
-    if not phone.isdigit():
-        error_label.config(text="El número de celular debe ser numérico.", foreground="red")
+    phone = phone.strip()
+    if not re.match(r'^\+54\d{10}$', phone):
+        error_label.config(
+            text="Por favor ingrese el número en el formato '+54' seguido de 10 dígitos sin el prefijo '9'.",
+            foreground="red")
         return False
-    if len(phone) < 10:
-        error_label.config(text="El número de celular debe tener al menos 10 dígitos.", foreground="red")
+    #longitud total del número (debe ser 13 caracteres: '+54' + 10 dígitos)
+    if len(phone) != 13:
+        error_label.config(
+            text="El número de celular debe tener exactamente 13 dígitos (incluyendo '+54').",
+            foreground="red")
         return False
     return True
 
@@ -89,17 +95,25 @@ def save_users(users):
         json.dump(users, file, indent=4)
 
 def format_phone(phone):
-    phone = phone.strip() 
+    phone = phone.strip()
+    
+    # Verifica que el número sea válido
     if not re.match(r'^\+?[\d\s]+$', phone) or len(phone) < 10:
         raise ValueError("Por favor ingrese un número de celular correspondiente a AMBA.")
     
+    # Elimina el prefijo "11" si está presente
     if phone.startswith("11"):
-        phone = phone[2:]  # chau "11" si está al principio
+        phone = phone[2:]
     
+    # Agrega el prefijo nacional +54 si no está presente
     if not phone.startswith("+"):
-        phone = "+549" + phone  
+        phone = "+54" + phone
     
-    return phone
+    # Asegúrate de que el número tenga el formato correcto
+    if phone.startswith("+54") and len(phone) == 13:
+        return phone
+    else:
+        raise ValueError("Número de celular no válido.")
 
 def send_code(phone, code):
     """Envía un código de verificación al teléfono proporcionado."""
@@ -117,29 +131,28 @@ def send_code(phone, code):
 
 def generate_and_send_code(full_name, phone):
     """Genera un código, lo guarda o actualiza el usuario y lo envía por SMS."""
-    code = secrets.token_hex(3)  
+    code = secrets.token_hex(3)
     users = load_users()
 
-    if not validate_phone(phone, None): 
-        return None
-    
-    existing_user = next((u for u in users if u["phone"] == phone), None)
+    # Formatea el número de teléfono
+    formatted_phone = format_phone(phone)
+
+    existing_user = next((u for u in users if u["phone"] == formatted_phone), None)
 
     if existing_user:
-        send_code(phone, code)
+        send_code(formatted_phone, code)
     else:
         new_user = {
             "id": len(users) + 1,
             "category": "Patient",
             "name": full_name,
-            "phone": phone
-            #agregar turnos con historial
-            #,
-            #"appointments": 
+            "phone": formatted_phone
+            # Agregar turnos con historial
+            # "appointments": 
         }
         users.append(new_user)
         save_users(users)
-        send_code(phone, code)
+        send_code(formatted_phone, code)
 
     return code
 
