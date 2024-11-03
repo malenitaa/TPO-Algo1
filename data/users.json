@@ -4,5 +4,11 @@
         "category": "Doctor",
         "name": "Paul",
         "phone": "+5491156090715"
+    },
+    {
+        "id": 2,
+        "category": "Patient",
+        "name": "Candela Re",
+        "phone": "+541130855526"
     }
 ]

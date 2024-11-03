@@ -5,12 +5,13 @@ import secrets
 import json
 import os
 from twilio.rest import Client
-import re, unicodedata
-#ver que capaz se repiten validaciones de celular con las funciones validar y sendcode
-#customtkinter
-#modularizar 
-#pep.8 pipinstallpep8
-#niceui
+import re
+import unicodedata
+
+# customtkinter
+# modularizar
+# pep.8 pipinstallpep8
+# niceui
 
 # Twilio
 ACCOUNT_SID = 'AC2a5e1f0b785cbef8d46cd60143678688'
@@ -21,23 +22,32 @@ client = Client(ACCOUNT_SID, AUTH_TOKEN)
 
 users_file = 'data/users.json'
 
+
 def validar_nombre(nombre, error_label):
     nombre_parts = nombre.split()
     if len(nombre_parts) < 2:
-        error_label.config(text="Por favor ingrese un nombre completo (nombre y apellido).", foreground="red")
-        raise ValueError("Por favor ingrese un nombre completo (nombre y apellido).")
+        error_label.config(
+            text="Por favor ingrese un nombre completo (nombre y apellido).", foreground="red")
+        raise ValueError(
+            "Por favor ingrese un nombre completo (nombre y apellido).")
     if not all(re.match(r"^[a-zA-ZáéíóúÁÉÍÓÚ]+$", part) for part in nombre_parts):
-        error_label.config(text="El nombre completo solo debe contener letras y espacios.", foreground="red")
-        raise ValueError("El nombre completo solo debe contener letras y espacios.")
+        error_label.config(
+            text="El nombre completo solo debe contener letras y espacios.",
+            foreground="red")
+        raise ValueError(
+            "El nombre completo solo debe contener letras y espacios.")
     else:
         error_label.config(text="", foreground="black")
+
 
 def eliminar_tildes(texto):
     return ''.join((c for c in unicodedata.normalize('NFD', texto) if unicodedata.category(c) != 'Mn'))
 
+
 def formatear_nombre(nombre):
     nombre_sin_tildes = eliminar_tildes(nombre)
     return nombre_sin_tildes.title()
+
 
 def validate_phone(phone, error_label):
     phone = phone.strip()
@@ -46,13 +56,14 @@ def validate_phone(phone, error_label):
             text="Por favor ingrese el número en el formato '+54' seguido de 10 dígitos sin el prefijo '9'.",
             foreground="red")
         return False
-    #longitud total del número (debe ser 13 caracteres: '+54' + 10 dígitos)
+    # longitud total del número (debe ser 13 caracteres: '+54' + 10 dígitos)
     if len(phone) != 13:
         error_label.config(
             text="El número de celular debe tener exactamente 13 dígitos (incluyendo '+54').",
             foreground="red")
         return False
     return True
+
 
 def verify_user():
     full_name = full_name_entry.get()
@@ -62,13 +73,14 @@ def verify_user():
         try:
             validar_nombre(full_name, error_label)
             if not validate_phone(phone, error_label):
-                return 
+                return
 
             full_name = formatear_nombre(full_name)
-            
+
             users = load_users()
             if any(u["phone"] == phone for u in users):
-                error_label.config(text="Ya existe un usuario con este número de celular.", foreground="red")
+                error_label.config(
+                    text="Ya existe un usuario con este número de celular.", foreground="red")
                 return
 
             generated_code = generate_and_send_code(full_name, phone)
@@ -78,7 +90,8 @@ def verify_user():
         except ValueError as e:
             print(f"Error: {e}")
     else:
-        error_label.config(text="Por favor ingrese nombre y celular.", foreground="red")
+        error_label.config(
+            text="Por favor ingrese nombre y celular.", foreground="red")
 
 
 def load_users():
@@ -89,31 +102,35 @@ def load_users():
     else:
         return []
 
+
 def save_users(users):
     """Guarda los usuarios en un archivo JSON."""
     with open(users_file, 'w') as file:
         json.dump(users, file, indent=4)
 
+
 def format_phone(phone):
     phone = phone.strip()
-    
+
     # Verifica que el número sea válido
     if not re.match(r'^\+?[\d\s]+$', phone) or len(phone) < 10:
-        raise ValueError("Por favor ingrese un número de celular correspondiente a AMBA.")
-    
+        raise ValueError(
+            "Por favor ingrese un número de celular correspondiente a AMBA.")
+
     # Elimina el prefijo "11" si está presente
     if phone.startswith("11"):
         phone = phone[2:]
-    
+
     # Agrega el prefijo nacional +54 si no está presente
     if not phone.startswith("+"):
         phone = "+54" + phone
-    
+
     # Asegúrate de que el número tenga el formato correcto
     if phone.startswith("+54") and len(phone) == 13:
         return phone
     else:
         raise ValueError("Número de celular no válido.")
+
 
 def send_code(phone, code):
     """Envía un código de verificación al teléfono proporcionado."""
@@ -125,9 +142,11 @@ def send_code(phone, code):
             from_=TWILIO_PHONE,
             to=formatted_phone
         )
-        print(f'Código enviado a {formatted_phone}. SID del mensaje: {response.sid}')
+        print(
+            f'Código enviado a {formatted_phone}. SID del mensaje: {response.sid}')
     except Exception as e:
         print(f'Error al enviar SMS: {e}')
+
 
 def generate_and_send_code(full_name, phone):
     """Genera un código, lo guarda o actualiza el usuario y lo envía por SMS."""
@@ -137,7 +156,8 @@ def generate_and_send_code(full_name, phone):
     # Formatea el número de teléfono
     formatted_phone = format_phone(phone)
 
-    existing_user = next((u for u in users if u["phone"] == formatted_phone), None)
+    existing_user = next(
+        (u for u in users if u["phone"] == formatted_phone), None)
 
     if existing_user:
         send_code(formatted_phone, code)
@@ -148,7 +168,7 @@ def generate_and_send_code(full_name, phone):
             "name": full_name,
             "phone": formatted_phone
             # Agregar turnos con historial
-            # "appointments": 
+            # "appointments":
         }
         users.append(new_user)
         save_users(users)
@@ -161,32 +181,37 @@ def show_frame(frame):
     """Muestra el frame especificado en la ventana principal."""
     frame.tkraise()
 
+
 def login_screen(root, frames):
     """Pantalla de inicio de sesión."""
     login_frame = ttk.Frame(root)
     login_frame.grid(row=0, column=0, sticky='nsew')
 
     # Header
-    header_label = ttk.Label(login_frame, text="Sistema gestor de turnos", font=("Arial", 20))
+    header_label = ttk.Label(
+        login_frame, text="Sistema gestor de turnos", font=("Arial", 20))
     header_label.grid(row=0, column=0, columnspan=2, pady=10)
 
-    subheader_label = ttk.Label(login_frame, text="Bienvenido, ingrese sus datos para avanzar a sacar turno.", font=("Arial", 10))
+    subheader_label = ttk.Label(
+        login_frame, text="Bienvenido, ingrese sus datos para avanzar a sacar turno.", font=("Arial", 10))
     subheader_label.grid(row=1, column=0, columnspan=2, padx=10, pady=10)
 
-    ttk.Label(login_frame, text="Nombre Completo:").grid(row=2, column=0, padx=10, pady=10)
+    ttk.Label(login_frame, text="Nombre Completo:").grid(
+        row=2, column=0, padx=10, pady=10)
     global full_name_entry
     full_name_entry = ttk.Entry(login_frame)
     full_name_entry.grid(row=2, column=1, padx=10, pady=10)
 
-    ttk.Label(login_frame, text="Teléfono Celular:").grid(row=3, column=0, padx=10, pady=10)
+    ttk.Label(login_frame, text="Teléfono Celular:").grid(
+        row=3, column=0, padx=10, pady=10)
     global phone_entry
     phone_entry = ttk.Entry(login_frame)
     phone_entry.grid(row=3, column=1, padx=10, pady=10)
-    
+
     global error_label
     error_label = ttk.Label(login_frame, text="", foreground="red")
     error_label.grid(row=5, column=0, columnspan=2, pady=10)
-    
+
     def verify_user():
         full_name = full_name_entry.get()
         phone = phone_entry.get()
@@ -201,21 +226,25 @@ def login_screen(root, frames):
             except ValueError as e:
                 print(f"Error: {e}")
         else:
-            error_label.config(text="Por favor ingrese nombre y celular.", foreground="red")
+            error_label.config(
+                text="Por favor ingrese nombre y celular.", foreground="red")
 
-    ttk.Button(login_frame, text="Enviar Código", command=verify_user).grid(row=4, column=0, columnspan=2, pady=20)
-    
+    ttk.Button(login_frame, text="Enviar Código", command=verify_user).grid(
+        row=4, column=0, columnspan=2, pady=20)
+
     return login_frame
+
 
 def verify_code_screen(root, frames, phone, generated_code):
     """Pantalla de verificación de código."""
     verify_code_frame = ttk.Frame(root)
     verify_code_frame.grid(row=0, column=0, sticky='nsew')
 
-    ttk.Label(verify_code_frame, text="Código:").grid(row=0, column=0, padx=10, pady=10)
+    ttk.Label(verify_code_frame, text="Código:").grid(
+        row=0, column=0, padx=10, pady=10)
     code_entry = ttk.Entry(verify_code_frame)
     code_entry.grid(row=0, column=1, padx=10, pady=10)
-    
+
     def check_code():
         entered_code = code_entry.get()
         if entered_code == generated_code:
@@ -230,16 +259,19 @@ def verify_code_screen(root, frames, phone, generated_code):
         else:
             print("Código Incorrecto")
 
-    ttk.Button(verify_code_frame, text="Verificar", command=check_code).grid(row=1, column=0, columnspan=2, pady=20)
-    ttk.Button(verify_code_frame, text="Volver al Inicio", command=lambda: show_frame(frames["LoginScreen"])).grid(row=2, column=0, columnspan=2, pady=10)
+    ttk.Button(verify_code_frame, text="Verificar", command=check_code).grid(
+        row=1, column=0, columnspan=2, pady=20)
+    ttk.Button(verify_code_frame, text="Volver al Inicio", command=lambda: show_frame(
+        frames["LoginScreen"])).grid(row=2, column=0, columnspan=2, pady=10)
 
     return verify_code_frame
+
 
 def doctor_screen(root, frames):
     """Pantalla de doctor."""
     doctor_frame = ttk.Frame(root)
     doctor_frame.grid(row=0, column=0, sticky='nsew')
-    #agregar horario y turnos marcados, grisar los dias pasados
+    # agregar horario y turnos marcados, grisar los dias pasados
     cal = Calendar(doctor_frame, selectmode='day', year=2024, month=9, day=7)
     cal.pack(pady=20)
 
@@ -256,16 +288,19 @@ def doctor_screen(root, frames):
         else:
             print("El mensaje está vacío.")
 
-    ttk.Button(doctor_frame, text="Enviar Mensaje a Usuarios", command=enviar_mensaje).pack(pady=10)
-    ttk.Button(doctor_frame, text="Volver al Inicio", command=lambda: show_frame(frames["LoginScreen"])).pack(pady=10)
+    ttk.Button(doctor_frame, text="Enviar Mensaje a Usuarios",
+               command=enviar_mensaje).pack(pady=10)
+    ttk.Button(doctor_frame, text="Volver al Inicio",
+               command=lambda: show_frame(frames["LoginScreen"])).pack(pady=10)
 
     return doctor_frame
+
 
 def patient_screen(root, frames):
     """Pantalla de paciente."""
     patient_frame = ttk.Frame(root)
     patient_frame.grid(row=0, column=0, sticky='nsew')
-    #agregar horario y turnos marcados, grisar los dias pasados
+    # agregar horario y turnos marcados, grisar los dias pasados
     cal = Calendar(patient_frame, selectmode='day', year=2024, month=9, day=7)
     cal.pack(pady=20)
 
@@ -273,16 +308,20 @@ def patient_screen(root, frames):
         fecha_seleccionada = cal.get_date()
         print(f"Turno reservado para: {fecha_seleccionada}")
 
-    ttk.Button(patient_frame, text="Reservar Turno", command=reservar_turno).pack(pady=10)
+    ttk.Button(patient_frame, text="Reservar Turno",
+               command=reservar_turno).pack(pady=10)
 
     def ver_turnos_anteriores():
         print("Mostrando turnos anteriores")
 
-    ttk.Button(patient_frame, text="Turnos Anteriores", command=ver_turnos_anteriores).pack(pady=10)
-    ttk.Button(patient_frame, text="Volver al Inicio", command=lambda: show_frame(frames["LoginScreen"])).pack(pady=10)
-    #agregar cerrar sesion o algo para salir
+    ttk.Button(patient_frame, text="Turnos Anteriores",
+               command=ver_turnos_anteriores).pack(pady=10)
+    ttk.Button(patient_frame, text="Volver al Inicio",
+               command=lambda: show_frame(frames["LoginScreen"])).pack(pady=10)
+    # agregar cerrar sesion o algo para salir
 
     return patient_frame
+
 
 def main():
     root = tk.Tk()
@@ -298,5 +337,7 @@ def main():
 
     root.mainloop()
 
+
 if __name__ == "__main__":
     main()
+    
