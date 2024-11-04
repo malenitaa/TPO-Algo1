@@ -22,5 +22,11 @@
         "category": "Patient",
         "name": "Can Re",
         "phone": "+541123323322"
+    },
+    {
+        "id": 5,
+        "category": "Patient",
+        "name": "Candela Re",
+        "phone": "+541130656677"
     }
 ]

@@ -187,7 +187,6 @@ def verify_code_screen(root, frames, phone, generated_code):
 
     return verify_code_frame
 
-
 def doctor_screen(root, frames):
     """Pantalla de doctor."""
     # Crear el marco y asegurarse de que ocupe todo el espacio
@@ -207,7 +206,7 @@ def doctor_screen(root, frames):
     cal.pack(pady=20)
 
     # Caja de mensajes
-    mensaje_box = ctk.CTkTextbox(doctor_frame, height=5, width=40)
+    mensaje_box = ctk.CTkTextbox(doctor_frame, height=10, width=200, border_color="#CCCCCC", border_width=1)
     mensaje_box.pack(pady=10)
 
     def enviar_mensaje():
