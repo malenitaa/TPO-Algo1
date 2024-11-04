@@ -2,13 +2,25 @@
     {
         "id": 1,
         "category": "Doctor",
-        "name": "Paul",
-        "phone": "+5491156090715"
+        "name": "Paul Re",
+        "phone": "+541156090715"
     },
     {
         "id": 2,
         "category": "Patient",
         "name": "Candela Re",
         "phone": "+541130855526"
+    },
+    {
+        "id": 3,
+        "category": "Patient",
+        "name": "Candela Re",
+        "phone": "+541120658876"
+    },
+    {
+        "id": 4,
+        "category": "Patient",
+        "name": "Can Re",
+        "phone": "+541123323322"
     }
 ]
