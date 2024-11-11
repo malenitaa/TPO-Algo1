@@ -114,7 +114,8 @@ def generate_and_send_code(full_name, phone):
             "id": len(users) + 1,
             "category": "Patient",
             "name": full_name,
-            "phone": formatted_phone
+            "phone": formatted_phone,
+            "turnos": []
         }
         users.append(new_user)
         save_users(users)
@@ -285,13 +286,50 @@ def patient_screen(root, frames):
     def reservar_turno():
         fecha_seleccionada = cal.get_date()
         print(f"Turno reservado para: {fecha_seleccionada}")
+        # Obtener el teléfono del paciente (debe estar disponible en esta pantalla, probablemente usando la variable `phone`)
+        phone = phone_entry.get()  # Asegúrate de que `phone_entry` esté correctamente configurado
+        # Llamar a la función para agregar el turno al paciente
+        agregar_turno(phone, fecha_seleccionada)
+
+    def agregar_turno(phone, fecha_turno):
+        """Agrega un turno reservado a un paciente."""
+        users = load_users()
+
+        # Buscar al paciente por su número de teléfono
+        paciente = next((u for u in users if u["phone"] == phone), None)
+
+        if paciente and paciente["category"] == "Patient":
+            # Agregar el nuevo turno a la lista de turnos del paciente
+            paciente["turnos"].append({"fecha": fecha_turno})
+
+            # Guardar los cambios en el archivo JSON
+            save_users(users)
+
+            print(f"Turno reservado para {paciente['name']} en la fecha {fecha_turno}.")
+        else:
+            print("Paciente no encontrado o no es un paciente válido.")
 
     # Botón para reservar turno
     ctk.CTkButton(patient_frame, text="Reservar Turno", command=reservar_turno, width=200,
                   corner_radius=5, fg_color="#3498db", hover_color="#2980b9").pack(pady=10)
 
     def ver_turnos_anteriores():
-        print("Mostrando turnos anteriores")
+        phone = phone_entry.get()  # Asegúrate de que `phone_entry` esté correctamente configurado
+        users = load_users()
+
+        # Buscar al paciente por su número de teléfono
+        paciente = next((u for u in users if u["phone"] == phone), None)
+
+        if paciente and paciente["category"] == "Patient":
+            turnos = paciente["turnos"]
+            # Mostrar los turnos en la interfaz gráfica
+            for turno in turnos:
+                turno_label = ctk.CTkLabel(patient_frame, text=f"Turno: {turno['fecha']}", font=("Arial", 14))
+                turno_label.pack(pady=5)
+        else:
+            error_label = ctk.CTkLabel(patient_frame, text="Paciente no encontrado o no es un paciente válido.", font=("Arial", 14), text_color="red")
+            error_label.pack(pady=5)
+
 
     # Botón para ver turnos reservados
     ctk.CTkButton(patient_frame, text="Turnos Reservados", command=ver_turnos_anteriores,
