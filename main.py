@@ -1,11 +1,11 @@
-import customtkinter as ctk
+import customtkinter as ctk    
 from tkcalendar import Calendar
 import tkinter as tk
 import json
 import os
 import re
 import secrets
-from twilio.rest import Client
+from twilio.rest import Client 
 import unicodedata
 
 # Twilio configuration
@@ -287,7 +287,8 @@ def patient_screen(root, frames):
         fecha_seleccionada = cal.get_date()
         print(f"Turno reservado para: {fecha_seleccionada}")
         # Obtener el teléfono del paciente (debe estar disponible en esta pantalla, probablemente usando la variable `phone`)
-        phone = phone_entry.get()  # Asegúrate de que `phone_entry` esté correctamente configurado
+        # Asegúrate de que `phone_entry` esté correctamente configurado
+        phone = phone_entry.get()
         # Llamar a la función para agregar el turno al paciente
         agregar_turno(phone, fecha_seleccionada)
 
@@ -305,7 +306,8 @@ def patient_screen(root, frames):
             # Guardar los cambios en el archivo JSON
             save_users(users)
 
-            print(f"Turno reservado para {paciente['name']} en la fecha {fecha_turno}.")
+            print(
+                f"Turno reservado para {paciente['name']} en la fecha {fecha_turno}.")
         else:
             print("Paciente no encontrado o no es un paciente válido.")
 
@@ -314,7 +316,8 @@ def patient_screen(root, frames):
                   corner_radius=5, fg_color="#3498db", hover_color="#2980b9").pack(pady=10)
 
     def ver_turnos_anteriores():
-        phone = phone_entry.get()  # Asegúrate de que `phone_entry` esté correctamente configurado
+        # Asegúrate de que `phone_entry` esté correctamente configurado
+        phone = phone_entry.get()
         users = load_users()
 
         # Buscar al paciente por su número de teléfono
@@ -324,12 +327,13 @@ def patient_screen(root, frames):
             turnos = paciente["turnos"]
             # Mostrar los turnos en la interfaz gráfica
             for turno in turnos:
-                turno_label = ctk.CTkLabel(patient_frame, text=f"Turno: {turno['fecha']}", font=("Arial", 14))
+                turno_label = ctk.CTkLabel(
+                    patient_frame, text=f"Turno: {turno['fecha']}", font=("Arial", 14))
                 turno_label.pack(pady=5)
         else:
-            error_label = ctk.CTkLabel(patient_frame, text="Paciente no encontrado o no es un paciente válido.", font=("Arial", 14), text_color="red")
+            error_label = ctk.CTkLabel(patient_frame, text="Paciente no encontrado o no es un paciente válido.", font=(
+                "Arial", 14), text_color="red")
             error_label.pack(pady=5)
-
 
     # Botón para ver turnos reservados
     ctk.CTkButton(patient_frame, text="Turnos Reservados", command=ver_turnos_anteriores,
