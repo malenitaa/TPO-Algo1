@@ -240,7 +240,7 @@ def doctor_screen(root, frames):
     title_label.pack(pady=(20, 10))
 
     # Agregar calendario
-    cal = Calendar(doctor_frame, selectmode='day', year=2024, month=9, day=7)
+    cal = Calendar(doctor_frame, selectmode='day', year=2024, month=11, day=11)
     cal.pack(pady=20)
 
     # Caja de mensajes
@@ -280,7 +280,7 @@ def patient_screen(root, frames):
     title_label.pack(pady=(20, 10))
 
     # Agregar calendario
-    cal = Calendar(patient_frame, selectmode='day', year=2024, month=9, day=7)
+    cal = Calendar(patient_frame, selectmode='day', year=2024, month=11, day=11)
     cal.pack(pady=20)
 
     def reservar_turno():
