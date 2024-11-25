@@ -7,6 +7,9 @@ import re
 import secrets
 from twilio.rest import Client 
 import unicodedata
+from datetime import datetime
+import pytest
+from pruebas import test_validar_nombre, test_validate_phone
 
 # Twilio configuration
 ACCOUNT_SID = 'AC2a5e1f0b785cbef8d46cd60143678688'
