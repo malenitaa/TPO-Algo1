@@ -277,7 +277,6 @@ def patient_screen(root, frames):
     patient_frame = ctk.CTkFrame(root)
     patient_frame.grid(row=0, column=0, sticky='nsew')
 
-    # Título
     title_label = ctk.CTkLabel(patient_frame, text="Reservar Turno", font=(
         "Arial", 24, "bold"), text_color="#2c3e50")
     title_label.pack(pady=(20, 10))
@@ -288,11 +287,21 @@ def patient_screen(root, frames):
 
     def reservar_turno():
         fecha_seleccionada = cal.get_date()
+        fecha_seleccionada_dt = datetime.strptime(fecha_seleccionada, "%m/%d/%y")
+        fecha_actual_dt = datetime.now()
+
+        if fecha_seleccionada_dt < fecha_actual_dt:
+            print("La fecha de turno no puede ser anterior a la fecha de hoy.")
+            # Dentro de patient_screen:
+            error_label = ctk.CTkLabel(patient_frame, text="", font=("Arial", 12), text_color="red")
+            error_label.pack(pady=5)
+
+            error_label.configure(text="La fecha de turno no puede ser anterior a la fecha de hoy.")
+
+            return
+
         print(f"Turno reservado para: {fecha_seleccionada}")
-        # Obtener el teléfono del paciente (debe estar disponible en esta pantalla, probablemente usando la variable `phone`)
-        # Asegúrate de que `phone_entry` esté correctamente configurado
         phone = phone_entry.get()
-        # Llamar a la función para agregar el turno al paciente
         agregar_turno(phone, fecha_seleccionada)
 
     def agregar_turno(phone, fecha_turno):
@@ -319,7 +328,6 @@ def patient_screen(root, frames):
                   corner_radius=5, fg_color="#3498db", hover_color="#2980b9").pack(pady=10)
 
     def ver_turnos_anteriores():
-        # Asegúrate de que `phone_entry` esté correctamente configurado
         phone = phone_entry.get()
         users = load_users()
 
@@ -328,7 +336,6 @@ def patient_screen(root, frames):
 
         if paciente and paciente["category"] == "Patient":
             turnos = paciente["turnos"]
-            # Mostrar los turnos en la interfaz gráfica
             for turno in turnos:
                 turno_label = ctk.CTkLabel(
                     patient_frame, text=f"Turno: {turno['fecha']}", font=("Arial", 14))
