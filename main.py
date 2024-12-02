@@ -175,6 +175,7 @@ def login_screen(root, frames):
     def verify_user():
         full_name = full_name_entry.get()
         phone = phone_entry.get()
+        turnos = []
         if full_name and phone:
             try:
                 validar_nombre(full_name, error_label)
@@ -242,12 +243,10 @@ def verify_code_screen(root, frames, phone, generated_code):
 
 def doctor_screen(root, frames):
     """Pantalla de doctor."""
-    # Crear el marco y asegurarse de que ocupe todo el espacio
     doctor_frame = ctk.CTkFrame(
         root, corner_radius=10, fg_color="#f5f5f5", border_color="#CCCCCC", border_width=2)
     doctor_frame.grid(row=0, column=0, sticky='nsew')
 
-    # Configurar el grid para que el marco ocupe todo el espacio
     root.grid_rowconfigure(0, weight=1)
     root.grid_columnconfigure(0, weight=1)
 
@@ -279,12 +278,35 @@ def doctor_screen(root, frames):
     ctk.CTkButton(doctor_frame, text="Enviar Mensaje a Usuarios", command=enviar_mensaje,
                   width=200, corner_radius=5, fg_color="#3498db", hover_color="#2980b9").pack(pady=10)
 
+    def mostrar_turnos():
+        """Muestra los turnos de los pacientes."""
+        users = cargar_usuarios()
+        turnos_text = ""
+        for user in users:
+            if user["category"] == "Patient" and user.get("turnos"):
+                turnos_text += f"Paciente: {user['name']}\n"
+                for turno in user["turnos"]:
+                    turnos_text += f"  - {turno['fecha']}\n"
+        if not turnos_text:
+            turnos_text = "No hay turnos reservados."
+
+        # mostrar turnos
+        turnos_window = ctk.CTkToplevel(root)
+        turnos_window.title("Turnos de Pacientes")
+        turnos_window.geometry("400x300")
+
+        turnos_label = ctk.CTkLabel(turnos_window, text=turnos_text, justify="left")
+        turnos_label.pack(pady=20, padx=20)
+
+    # Botón para mostrar turnos
+    ctk.CTkButton(doctor_frame, text="Turnos de Pacientes", command=mostrar_turnos,
+                  width=200, corner_radius=5, fg_color="#2ecc71", hover_color="#27ae60").pack(pady=10)
+
     # Botón para volver al inicio
     ctk.CTkButton(doctor_frame, text="Volver al Inicio", command=lambda: show_frame(
         frames["LoginScreen"]), width=200, corner_radius=5, fg_color="#e74c3c", hover_color="#c0392b").pack(pady=10)
 
     return doctor_frame
-
 
 def patient_screen(root, frames):
     """Pantalla de paciente."""
