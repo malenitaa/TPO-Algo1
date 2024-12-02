@@ -1,11 +1,11 @@
-import customtkinter as ctk    
+import customtkinter as ctk
 from tkcalendar import Calendar
 import tkinter as tk
 import json
 import os
 import re
 import secrets
-from twilio.rest import Client 
+from twilio.rest import Client
 import unicodedata
 from datetime import datetime
 import pytest
@@ -27,14 +27,16 @@ def validar_nombre(nombre, error_label):
     if not all(re.match(r"^[a-zA-ZáéíóúÁÉÍÓÚ]+$", part) for part in nombre_parts):
         error_label.configure(
             text="El nombre completo solo debe contener letras y espacios.", text_color="red")
-        raise ValueError("El nombre completo solo debe contener letras y espacios.")
-    
+        raise ValueError(
+            "El nombre completo solo debe contener letras y espacios.")
+
     # Validación para verificar que haya al menos un nombre y un apellido
     if len(nombre_parts) < 2:
         error_label.configure(
             text="Por favor ingrese un nombre completo (nombre y apellido).", text_color="red")
-        raise ValueError("Por favor ingrese un nombre completo (nombre y apellido).")
-    
+        raise ValueError(
+            "Por favor ingrese un nombre completo (nombre y apellido).")
+
     # Si todo es válido
     error_label.configure(text="", text_color="black")
     return True
@@ -43,9 +45,11 @@ def validar_nombre(nombre, error_label):
 def eliminar_tildes(texto):
     return ''.join((c for c in unicodedata.normalize('NFD', texto) if unicodedata.category(c) != 'Mn'))
 
+
 def formatear_nombre(nombre):
     nombre_sin_tildes = eliminar_tildes(nombre)
     return nombre_sin_tildes.title()
+
 
 def validar_telefono(phone, error_label):
     phone = phone.strip()
@@ -197,7 +201,8 @@ def login_screen(root, frames):
 def verify_code_screen(root, frames, phone, generated_code):
     """Pantalla de verificación de código."""
     root.configure(bg="#f2f2f2")
-    verify_code_frame = ctk.CTkFrame(root, corner_radius=10, fg_color="#f2f2f2")
+    verify_code_frame = ctk.CTkFrame(
+        root, corner_radius=10, fg_color="#f2f2f2")
     verify_code_frame.grid(row=0, column=0, sticky='nsew', padx=20, pady=20)
 
     root.grid_rowconfigure(0, weight=1)
@@ -206,7 +211,8 @@ def verify_code_screen(root, frames, phone, generated_code):
     content_frame = ctk.CTkFrame(verify_code_frame, fg_color="#f2f2f2")
     content_frame.pack(expand=True)
 
-    ctk.CTkLabel(content_frame, text="Ingrese el código enviado por SMS:").pack(padx=10, pady=10)
+    ctk.CTkLabel(content_frame, text="Ingrese el código enviado por SMS:").pack(
+        padx=10, pady=10)
 
     code_entry = ctk.CTkEntry(content_frame)
     code_entry.pack(padx=10, pady=10)
@@ -228,7 +234,8 @@ def verify_code_screen(root, frames, phone, generated_code):
         else:
             print("Código Incorrecto")
 
-    ctk.CTkButton(content_frame, text="Verificar", command=check_code).pack(padx=10, pady=20)
+    ctk.CTkButton(content_frame, text="Verificar",
+                  command=check_code).pack(padx=10, pady=20)
 
     return verify_code_frame
 
@@ -294,16 +301,19 @@ def patient_screen(root, frames):
 
     def reservar_turno():
         fecha_seleccionada = cal.get_date()
-        fecha_seleccionada_dt = datetime.strptime(fecha_seleccionada, "%m/%d/%y")
+        fecha_seleccionada_dt = datetime.strptime(
+            fecha_seleccionada, "%m/%d/%y")
         fecha_actual_dt = datetime.now()
 
         if fecha_seleccionada_dt < fecha_actual_dt:
             print("La fecha de turno no puede ser anterior a la fecha de hoy.")
             # Dentro de patient_screen:
-            error_label = ctk.CTkLabel(patient_frame, text="", font=("Arial", 12), text_color="red")
+            error_label = ctk.CTkLabel(
+                patient_frame, text="", font=("Arial", 12), text_color="red")
             error_label.pack(pady=5)
 
-            error_label.configure(text="La fecha de turno no puede ser anterior a la fecha de hoy.")
+            error_label.configure(
+                text="La fecha de turno no puede ser anterior a la fecha de hoy.")
 
             return
 

@@ -47,24 +47,21 @@
         "category": "Patient",
         "name": "Pilar Re",
         "phone": "+541123211213",
-        "turnos": [
-        ]
+        "turnos": []
     },
     {
         "id": 9,
         "category": "Patient",
         "name": "Camila Re",
         "phone": "+541132455567",
-        "turnos": [
-        ]
+        "turnos": []
     },
     {
         "id": 10,
         "category": "Patient",
         "name": "Ricardo Re",
         "phone": "+541130988876",
-        "turnos": [
-        ]
+        "turnos": []
     },
     {
         "id": 11,
@@ -85,9 +82,7 @@
         "category": "Patient",
         "name": "Malena Villa Abrille",
         "phone": "+541156090716",
-        "turnos": [
-
-        ]
+        "turnos": []
     },
     {
         "id": 14,
@@ -101,8 +96,43 @@
         "category": "Patient",
         "name": "Malena Villa Abrille",
         "phone": "+541156090717",
+        "turnos": []
+    },
+    {
+        "id": 16,
+        "category": "Patient",
+        "name": "Candela Tre",
+        "phone": "+541124678900",
         "turnos": [
-
+            {
+                "fecha": "12/26/24"
+            },
+            {
+                "fecha": "12/27/24"
+            },
+            {
+                "fecha": "12/19/24"
+            },
+            {
+                "fecha": "1/30/25"
+            },
+            {
+                "fecha": "12/4/24"
+            }
+        ]
+    },
+    {
+        "id": 17,
+        "category": "Patient",
+        "name": "Malena Bre",
+        "phone": "+541123457654",
+        "turnos": [
+            {
+                "fecha": "12/20/24"
+            },
+            {
+                "fecha": "12/26/24"
+            }
         ]
     }
 ]
