@@ -9,7 +9,6 @@ from twilio.rest import Client
 import unicodedata
 from datetime import datetime
 import pytest
-from pruebas import test_validar_nombre, test_validate_phone
 
 # Twilio configuration
 ACCOUNT_SID = 'AC2a5e1f0b785cbef8d46cd60143678688'
@@ -23,43 +22,45 @@ users_file = 'data/users.json'
 
 def validar_nombre(nombre, error_label):
     nombre_parts = nombre.split()
-    if len(nombre_parts) < 2:
-        error_label.configure(
-            text="Por favor ingrese un nombre completo (nombre y apellido).", text_color="red")
-        raise ValueError(
-            "Por favor ingrese un nombre completo (nombre y apellido).")
+
+    # Validación para asegurarse de que el nombre solo contenga letras y espacios
     if not all(re.match(r"^[a-zA-ZáéíóúÁÉÍÓÚ]+$", part) for part in nombre_parts):
         error_label.configure(
             text="El nombre completo solo debe contener letras y espacios.", text_color="red")
-        raise ValueError(
-            "El nombre completo solo debe contener letras y espacios.")
-    else:
-        error_label.configure(text="", text_color="black")
+        raise ValueError("El nombre completo solo debe contener letras y espacios.")
+    
+    # Validación para verificar que haya al menos un nombre y un apellido
+    if len(nombre_parts) < 2:
+        error_label.configure(
+            text="Por favor ingrese un nombre completo (nombre y apellido).", text_color="red")
+        raise ValueError("Por favor ingrese un nombre completo (nombre y apellido).")
+    
+    # Si todo es válido
+    error_label.configure(text="", text_color="black")
+    return True
 
 
 def eliminar_tildes(texto):
     return ''.join((c for c in unicodedata.normalize('NFD', texto) if unicodedata.category(c) != 'Mn'))
 
-
 def formatear_nombre(nombre):
     nombre_sin_tildes = eliminar_tildes(nombre)
     return nombre_sin_tildes.title()
 
-
-def validate_phone(phone, error_label):
+def validar_telefono(phone, error_label):
     phone = phone.strip()
     if not re.match(r'^\+54\d{10}$', phone):
         error_label.configure(
             text="Por favor ingrese el número en el formato '+54' seguido de 10 dígitos sin el prefijo '9'.", text_color="red")
-        return False
+        raise ValueError("Número de teléfono inválido")
     if len(phone) != 13:
         error_label.configure(
             text="El número de celular debe tener exactamente 13 dígitos (incluyendo '+54').", text_color="red")
-        return False
+        raise ValueError("El número debe tener exactamente 13 dígitos")
     return True
 
 
-def load_users():
+def cargar_usuarios():
     """Carga los usuarios desde un archivo JSON."""
     if os.path.exists(users_file):
         with open(users_file, 'r') as file:
@@ -68,13 +69,13 @@ def load_users():
         return []
 
 
-def save_users(users):
+def guardar_usuarios(users):
     """Guarda los usuarios en un archivo JSON."""
     with open(users_file, 'w') as file:
         json.dump(users, file, indent=4)
 
 
-def format_phone(phone):
+def formatear_telefono(phone):
     phone = phone.strip()
     if not re.match(r'^\+?[\d\s]+$', phone) or len(phone) < 10:
         raise ValueError(
@@ -89,9 +90,9 @@ def format_phone(phone):
         raise ValueError("Número de celular no válido.")
 
 
-def send_code(phone, code):
+def enviar_codigo(phone, code):
     """Envía un código de verificación al teléfono proporcionado."""
-    formatted_phone = format_phone(phone)
+    formatted_phone = formatear_telefono(phone)
     message = f"Su código de verificación es: {code}"
     try:
         response = client.messages.create(
@@ -102,16 +103,16 @@ def send_code(phone, code):
         print(f'Error al enviar SMS: {e}')
 
 
-def generate_and_send_code(full_name, phone):
+def generar_enviar_codigo(full_name, phone):
     """Genera un código, lo guarda o actualiza el usuario y lo envía por SMS."""
     code = secrets.token_hex(3)
-    users = load_users()
-    formatted_phone = format_phone(phone)
+    users = cargar_usuarios()
+    formatted_phone = formatear_telefono(phone)
     existing_user = next(
         (u for u in users if u["phone"] == formatted_phone), None)
 
     if existing_user:
-        send_code(formatted_phone, code)
+        enviar_codigo(formatted_phone, code)
     else:
         new_user = {
             "id": len(users) + 1,
@@ -121,8 +122,8 @@ def generate_and_send_code(full_name, phone):
             "turnos": []
         }
         users.append(new_user)
-        save_users(users)
-        send_code(formatted_phone, code)
+        guardar_usuarios(users)
+        enviar_codigo(formatted_phone, code)
 
     return code
 
@@ -172,10 +173,10 @@ def login_screen(root, frames):
         if full_name and phone:
             try:
                 validar_nombre(full_name, error_label)
-                if not validate_phone(phone, error_label):
+                if not validar_telefono(phone, error_label):
                     return
                 full_name = formatear_nombre(full_name)
-                generated_code = generate_and_send_code(full_name, phone)
+                generated_code = generar_enviar_codigo(full_name, phone)
                 print(f'Código generado: {generated_code}')
                 frames["VerifyCodeScreen"] = verify_code_screen(
                     root, frames, phone, generated_code)
@@ -210,7 +211,7 @@ def verify_code_screen(root, frames, phone, generated_code):
 
         if entered_code == generated_code:
             print("Código Correcto")
-            users = load_users()
+            users = cargar_usuarios()
             user_data = next((u for u in users if u["phone"] == phone), None)
             if user_data:
                 if user_data["category"] == "Doctor":
@@ -243,7 +244,7 @@ def doctor_screen(root, frames):
     title_label.pack(pady=(20, 10))
 
     # Agregar calendario
-    cal = Calendar(doctor_frame, selectmode='day', year=2024, month=11, day=11)
+    cal = Calendar(doctor_frame, selectmode='day', year=2024, month=12, day=2)
     cal.pack(pady=20)
 
     # Caja de mensajes
@@ -254,9 +255,9 @@ def doctor_screen(root, frames):
     def enviar_mensaje():
         mensaje = mensaje_box.get("1.0", tk.END).strip()
         if mensaje:
-            users = load_users()
+            users = cargar_usuarios()
             for user in users:
-                send_code(user['phone'], mensaje)  # Twilio
+                enviar_codigo(user['phone'], mensaje)  # Twilio
             print(f"Mensaje enviado a todos los usuarios: {mensaje}")
         else:
             print("El mensaje está vacío.")
@@ -282,7 +283,7 @@ def patient_screen(root, frames):
     title_label.pack(pady=(20, 10))
 
     # Agregar calendario
-    cal = Calendar(patient_frame, selectmode='day', year=2024, month=11, day=11)
+    cal = Calendar(patient_frame, selectmode='day', year=2024, month=12, day=2)
     cal.pack(pady=20)
 
     def reservar_turno():
@@ -306,7 +307,7 @@ def patient_screen(root, frames):
 
     def agregar_turno(phone, fecha_turno):
         """Agrega un turno reservado a un paciente."""
-        users = load_users()
+        users = cargar_usuarios()
 
         # Buscar al paciente por su número de teléfono
         paciente = next((u for u in users if u["phone"] == phone), None)
@@ -316,7 +317,7 @@ def patient_screen(root, frames):
             paciente["turnos"].append({"fecha": fecha_turno})
 
             # Guardar los cambios en el archivo JSON
-            save_users(users)
+            guardar_usuarios(users)
 
             print(
                 f"Turno reservado para {paciente['name']} en la fecha {fecha_turno}.")
@@ -329,7 +330,7 @@ def patient_screen(root, frames):
 
     def ver_turnos_anteriores():
         phone = phone_entry.get()
-        users = load_users()
+        users = cargar_usuarios()
 
         # Buscar al paciente por su número de teléfono
         paciente = next((u for u in users if u["phone"] == phone), None)

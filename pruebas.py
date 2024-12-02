@@ -1,27 +1,47 @@
-#PRUEBAS    
-def test_validar_fecha():
-    hoy = datetime.now().date()
-    fecha_valida = "12/25/24"  # Fecha futura (es formato mm/dd/aa)
-    fecha_invalida = "01/01/23"  # Fecha pasada
+from unittest.mock import Mock
+import pytest
+from main import validar_nombre, validar_telefono, formatear_nombre
 
-    # Validar fecha válida
-    fecha_turno = datetime.strptime(fecha_valida, "%m/%d/%y").date()
-    assert fecha_turno >= hoy
-
-    # Validar fecha inválida
-    fecha_turno_invalida = datetime.strptime(fecha_invalida, "%m/%d/%y").date()
-    assert fecha_turno_invalida < hoy
-
-def test_validar_nombre():
+def test_validar_nombre_invalido():
+    mock_error_label = Mock()
+    
+    # Caso: solo nombre (sin apellido)
     with pytest.raises(ValueError):
-        validar_nombre("Juan", None)  # Nombre sin apellido
-
+        validar_nombre("Malena", mock_error_label)
+    
+    # Caso: nombre con caracteres no alfabéticos
     with pytest.raises(ValueError):
-        validar_nombre("1234", None)  # Nombre con caracteres no válidos
+        validar_nombre("Malena123", mock_error_label)
+    
+    mock_error_label.configure.assert_any_call(
+        text="Por favor ingrese un nombre completo (nombre y apellido).", text_color="red"
+    )
+    
+    mock_error_label.configure.assert_any_call(
+        text="El nombre completo solo debe contener letras y espacios.", text_color="red"
+    )
 
-    assert validar_nombre("Juan Pérez", None) is None  # Nombre correcto
+def test_formatear_nombre():
+    # Prueba con nombre con tildes
+    nombre = "José Maria"
+    assert formatear_nombre(nombre) == "Jose Maria"
+    
+    # Prueba con nombre sin tildes
+    nombre = "malena"
+    assert formatear_nombre(nombre) == "Malena"
+    
+    # Prueba con nombre con otros caracteres
+    nombre = "mARÍA jose"
+    assert formatear_nombre(nombre) == "Maria Jose"
 
-def test_validate_phone():
-    assert validate_phone("+541112345678", None)  # Número válido
-    assert not validate_phone("+5412345678", None)  # Número muy corto
-    assert not validate_phone("112345678", None)  # Número sin prefijo
+
+def test_validar_telefono():
+    mock_error_label = Mock()
+    # Prueba con un número válido
+    assert validar_telefono("+541112345678", mock_error_label)
+    # Prueba con un número corto 
+    with pytest.raises(ValueError):
+        validar_telefono("+5412345678", mock_error_label)
+    mock_error_label.configure.assert_called_with(
+        text="Por favor ingrese el número en el formato '+54' seguido de 10 dígitos sin el prefijo '9'.", 
+        text_color="red")
