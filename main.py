@@ -135,16 +135,17 @@ def show_frame(frame):
 
 def login_screen(root, frames):
     """Pantalla de inicio de sesión."""
-    login_frame = ctk.CTkFrame(root, corner_radius=10, fg_color="#F9F9F9")
+    root.configure(bg="#f2f2f2")
+    login_frame = ctk.CTkFrame(root, corner_radius=10, fg_color="#f2f2f2")
     login_frame.grid(row=0, column=0, sticky='nsew', padx=20, pady=20)
 
     # Header
     header_label = ctk.CTkLabel(login_frame, text="Sistema gestor de turnos", font=(
-        "Arial", 24, "bold"), text_color="#333333")
+        "Arial", 24, "bold"), text_color="#333333", fg_color="#f2f2f2")
     header_label.grid(row=0, column=0, columnspan=2, pady=(10, 20), sticky='n')
 
     subheader_label = ctk.CTkLabel(login_frame, text="Bienvenido, ingrese sus datos para avanzar a sacar turno.", font=(
-        "Arial", 12), text_color="#666666")
+        "Arial", 12), text_color="#666666", fg_color="#f2f2f2")
     subheader_label.grid(row=1, column=0, columnspan=2,
                          padx=10, pady=(0, 20), sticky='n')
 
@@ -195,14 +196,20 @@ def login_screen(root, frames):
 
 def verify_code_screen(root, frames, phone, generated_code):
     """Pantalla de verificación de código."""
-    verify_code_frame = ctk.CTkFrame(
-        root, corner_radius=10, fg_color="#F9F9F9")
-    verify_code_frame.grid(row=0, column=0, sticky='nsew')
+    root.configure(bg="#f2f2f2")
+    verify_code_frame = ctk.CTkFrame(root, corner_radius=10, fg_color="#f2f2f2")
+    verify_code_frame.grid(row=0, column=0, sticky='nsew', padx=20, pady=20)
 
-    ctk.CTkLabel(verify_code_frame, text="Código:").grid(
-        row=0, column=0, padx=10, pady=10)
-    code_entry = ctk.CTkEntry(verify_code_frame)
-    code_entry.grid(row=0, column=1, padx=10, pady=10)
+    root.grid_rowconfigure(0, weight=1)
+    root.grid_columnconfigure(0, weight=1)
+
+    content_frame = ctk.CTkFrame(verify_code_frame, fg_color="#f2f2f2")
+    content_frame.pack(expand=True)
+
+    ctk.CTkLabel(content_frame, text="Ingrese el código enviado por SMS:").pack(padx=10, pady=10)
+
+    code_entry = ctk.CTkEntry(content_frame)
+    code_entry.pack(padx=10, pady=10)
 
     def check_code():
         entered_code = code_entry.get().strip()  # Eliminar espacios en blanco
@@ -221,8 +228,7 @@ def verify_code_screen(root, frames, phone, generated_code):
         else:
             print("Código Incorrecto")
 
-    ctk.CTkButton(verify_code_frame, text="Verificar", command=check_code).grid(
-        row=1, column=0, columnspan=2, pady=20)
+    ctk.CTkButton(content_frame, text="Verificar", command=check_code).pack(padx=10, pady=20)
 
     return verify_code_frame
 
@@ -231,7 +237,7 @@ def doctor_screen(root, frames):
     """Pantalla de doctor."""
     # Crear el marco y asegurarse de que ocupe todo el espacio
     doctor_frame = ctk.CTkFrame(
-        root, corner_radius=10, fg_color="#FFFFFF", border_color="#CCCCCC", border_width=2)
+        root, corner_radius=10, fg_color="#f5f5f5", border_color="#CCCCCC", border_width=2)
     doctor_frame.grid(row=0, column=0, sticky='nsew')
 
     # Configurar el grid para que el marco ocupe todo el espacio
@@ -275,7 +281,7 @@ def doctor_screen(root, frames):
 
 def patient_screen(root, frames):
     """Pantalla de paciente."""
-    patient_frame = ctk.CTkFrame(root)
+    patient_frame = ctk.CTkFrame(root, corner_radius=10, fg_color="#f5f5f5")
     patient_frame.grid(row=0, column=0, sticky='nsew')
 
     title_label = ctk.CTkLabel(patient_frame, text="Reservar Turno", font=(
